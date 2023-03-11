@@ -1,0 +1,7 @@
+bnf/.stack-work
+bnf/Keys
+bnf/Makefile
+*.bak
+*.lock
+*.yaml
+bnf/out.c

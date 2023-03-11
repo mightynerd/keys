@@ -1,0 +1,8 @@
+double 2A 24 
+  =>  keyboard CTRL_LEFT,
+      consumer BAJS_MANNEN ;
+single 2A 
+  => keyboard CTRL_RIGHT,
+     consumer MEDIA_RECORD ;
+# little comment
+single 2B => mouse CTRL_RIGHT ;

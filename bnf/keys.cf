@@ -1,0 +1,21 @@
+token Hex       (["0123456789abcdefABCDEF"] +);
+
+SSource.  Source ::= "single" Hex;
+DSource.  Source ::= "double" Hex Hex;
+
+KeyCode.      Key ::= Ident;
+
+Mouse.    Device ::= "mouse";
+Keyboard. Device ::= "keyboard";
+Consumer. Device ::= "consumer";
+
+Target.   Targ ::= Device Key;
+separator Targ ",";
+
+Definition.   Def ::= Source "=>" [Targ] ";";
+separator     Def "";
+
+Definitions.  Defs ::= [Def];
+entrypoints Defs;
+
+comment "#";
