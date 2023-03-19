@@ -38,5 +38,5 @@ double 2A 3C
 
 In order to run the generator:
 1. Install ghc, bnfc, happy & alex.
-2. Inside `/bnf`, run `bnfc -d -m keys.cf`
+2. Inside `/bnf`, run `bnfc -d -m keys.cf && make`
 3. The `Gen.hs` program can now parse `/bnf/keys.def` and generate `/bnf/out.c`
