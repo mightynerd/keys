@@ -8,9 +8,13 @@ type SourceTarget = [(Hex, [Targ])]
 
 data St = St
   { a :: SourceTarget,
+    aMax :: Int,
     b :: SourceTarget,
+    bMax :: Int,
     c :: SourceTarget,
-    r :: SourceTarget
+    cMax :: Int,
+    r :: SourceTarget,
+    rMax :: Int
   }
   deriving (Show)
 
@@ -19,7 +23,7 @@ type Interpret = State St
 interpret :: Defs -> St
 interpret defs = execState (interpretDefs defs) state
   where
-    state = (St {a = [], b = [], c = [], r = []})
+    state = (St {a = [], b = [], c = [], r = [], aMax = 1, bMax = 1, cMax = 1, rMax = 1})
 
 interpretDefs :: Defs -> Interpret ()
 interpretDefs (Definitions defs) = mapM_ interpretDef defs
@@ -30,17 +34,21 @@ interpretDef (Definition source targets) = interpretSource source targets
 interpretSource :: Source -> [Targ] -> Interpret ()
 interpretSource (SSource s) targs = do
   r <- gets r
-  modify $ \st -> st {r = r ++ [(s, targs)]}
+  rMax <- gets rMax
+  modify $ \st -> st {r = r ++ [(s, targs)], rMax = max rMax (length targs)}
 interpretSource (DSource (Hex s') s) targs = case s' of
   "2A" -> do
     a <- gets a
-    modify $ \st -> st {a = a ++ [(s, targs)]}
+    aMax <- gets aMax
+    modify $ \st -> st {a = a ++ [(s, targs)], aMax = max aMax (length targs)}
   "2B" -> do
     b <- gets b
-    modify $ \st -> st {b = b ++ [(s, targs)]}
+    bMax <- gets bMax
+    modify $ \st -> st {b = b ++ [(s, targs)], bMax = max bMax (length targs)}
   "2C" -> do
     c <- gets c
-    modify $ \st -> st {c = c ++ [(s, targs)]}
+    cMax <- gets cMax
+    modify $ \st -> st {c = c ++ [(s, targs)], cMax = max cMax (length targs)}
 
 type Env = St
 
@@ -48,8 +56,45 @@ type Output = [String]
 
 type Generate = Writer Output
 
+-- Generate array definitions
+generateArrays :: Env -> Output
+generateArrays (St {aMax = a, bMax = b, cMax = c, rMax = r}) =
+  generateArray "a" a
+    ++ generateArray "b" b
+    ++ generateArray "c" c
+    ++ generateArray "r" r
+    ++ [""]
+
+-- Generate a single array definition
+generateArray :: String -> Int -> Output
+generateArray name max = case max of
+  0 -> [""]
+  _ -> ["struct target " ++ name ++ "[256][" ++ show max ++ "];"]
+
 generate :: Env -> Output
-generate env = snd $ runWriter (generateOutput env)
+generate env =
+  prefix
+    ++ generateArrays env
+    ++ initFPrefix
+    ++ tab (snd (runWriter $ generateOutput env))
+    ++ initFSuffix
+  where
+    prefix :: Output
+    prefix =
+      lines
+        "#define DEVICE_KEYBOARDD 0x01\n\
+        \#define DEVICE_MOUSE 0x02\n\
+        \#define DEVICE_CONSUMER 0x03\n\n\
+        \struct target {\n\
+        \  byte type;\n\
+        \  byte code;\n\
+        \};\n\n"
+    initFPrefix :: Output
+    initFPrefix = lines "void init_keys() {\n"
+    initFSuffix :: Output
+    initFSuffix = lines "}"
+    tab :: Output -> Output
+    tab = map ("  " ++)
 
 generateOutput :: Env -> Generate ()
 generateOutput (St {a, b, c, r}) = do
@@ -69,20 +114,38 @@ generateAssignments name source targets = generateAssignments' name source targe
   where
     generateAssignments' :: String -> String -> [Targ] -> Integer -> Generate ()
     generateAssignments' name source (target : targets) i = do
-      tell [generateAssignment name source target i]
+      tell [generateDeviceAssignment name source target i]
+      tell [generateCodeAssigment name source target i]
       generateAssignments' name source targets $ i + 1
     generateAssignments' _ _ [] _ = pure ()
 
-generateAssignment :: String -> String -> Targ -> Integer -> String
-generateAssignment name source (Target device (KeyCode (Ident code))) i =
-  name ++ "[" ++ source ++ "][" ++ show i ++ "] = " ++ code
+generateDeviceAssignment :: String -> String -> Targ -> Integer -> String
+generateDeviceAssignment name source (Target device _) i =
+  name
+    ++ "[0x"
+    ++ source
+    ++ "]["
+    ++ show i
+    ++ "].type = "
+    ++ dev device
+    ++ ";"
+  where
+    dev :: Device -> String
+    dev device = case device of
+      Keyboard -> "DEVICE_KEYBOARD"
+      Mouse -> "DEVICE_MOUSE"
+      Consumer -> "DEVICE_CONSUMER"
 
-main :: IO ()
-main = do
-  f <- readFile "./keys.def"
-  parsed <- parse f
-  writeFile "out.c" $ unlines $ generate $ interpret parsed
-  return ()
+generateCodeAssigment :: String -> String -> Targ -> Integer -> String
+generateCodeAssigment name source (Target _ (KeyCode (Ident code))) i =
+  name
+    ++ "[0x"
+    ++ source
+    ++ "]["
+    ++ show i
+    ++ "].code = "
+    ++ code
+    ++ ";"
 
 parse :: String -> IO Defs
 parse s =
@@ -93,3 +156,10 @@ parse s =
       exitFailure
     Right prog -> do
       return prog
+
+main :: IO ()
+main = do
+  f <- readFile "./keys.def"
+  parsed <- parse f
+  writeFile "out.c" $ unlines $ generate $ interpret parsed
+  return ()
