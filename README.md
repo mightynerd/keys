@@ -20,3 +20,23 @@ Modifiers:
 
 - Alt press:  1B 2C 65
 - Alt release: 1B 21 65
+
+# Code generation
+This project now suddently involves a C code generator to simplify key definitions. This is done using a simple key definition language defined in `/bnf/keys.cf`.
+
+Simple example of a key definition file:
+```
+# Remap a simple key `37` to the keyboard key `KEY_RETURN`
+single 37 => keyboard KEY_RETURN ;
+
+# Remap a double (two byte) key `2A 3C` to press the keyboard
+# key `KEY_LEFT_CTRL` followed by the consumer device key `MEDIA_PLAY_PAUSE`
+double 2A 3C
+  => keyboard KEY_LEFT_CTRL,
+     consumer MEDIA_PLAY_PAUSE ;
+```
+
+In order to run the generator:
+1. Install ghc, bnfc, happy & alex.
+2. Inside `/bnf`, run `bnfc -d -m keys.cf && make`
+3. The `Gen.hs` program can now parse `/bnf/keys.def` and generate `/bnf/out.c`
