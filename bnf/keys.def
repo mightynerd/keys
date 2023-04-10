@@ -1,8 +1,8 @@
 double 2A 24 
-  =>  keyboard CTRL_LEFT,
-      consumer BAJS_MANNEN ;
+  =>  keyboard "A1",
+      consumer "A2" ;
 single 2A 
-  => keyboard CTRL_RIGHT,
-     consumer MEDIA_RECORD ;
+  => keyboard "A3",
+     consumer "A4" ;
 # little comment
-single 2B => mouse CTRL_RIGHT ;
+single 2B => mouse "A5" ;
