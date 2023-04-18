@@ -12,33 +12,33 @@ struct target {
   byte code;
 };
 
-target a[256][2];
-target b[256][1];
-target c[256][1];
-target r[256][1];
+const PROGMEM struct target a[256][3] = {{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{{DEVICE_KEYBOARD, 'k'},{DEVICE_KEYBOARD, 'u'},{DEVICE_KEYBOARD, 'k'}},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}};
+const PROGMEM struct target b[256][1] = {{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}};
+const PROGMEM struct target c[256][1] = {{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}};
+const PROGMEM struct target r[256][3] = {{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{{DEVICE_KEYBOARD, 0xA3},{DEVICE_CONSUMER, 0xA4}},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{{DEVICE_KEYBOARD, 'a'},{DEVICE_KEYBOARD, 'b'},{DEVICE_KEYBOARD, 'c'}},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}};
 
-void init_keys() {
-  a[0x3C][0].type = 0x01;
-  a[0x3C][0].code = 0x01;
-  a[0x3C][1].type = 0x01;
-  a[0x3C][1].code = 0x01;
-  // Q
-  r[0x71][0].type = DEVICE_KEYBOARD;
-  r[0x71][0].code = 'a';
-}
+void print_target(const target* t) {
+  //if (t->type == 0) return;
 
-void print_target(target* t) {
-  Serial.print("  Type: ");
+  Serial.print(" -> Type: ");
   Serial.print(t->type, HEX);
   Serial.print(", code: ");
   Serial.print(t->code, HEX);
   Serial.print("\n");
 }
 
-void execute_target(target* t) {
+bool execute_target(const target* t) {
+  // Return if the target is not defined
+  print_target(t);
+  if (t->type == 0) {
+    Serial.println("Target undefined");
+    return false;
+  } else {
+    //print_target(t);
+  }
+
   switch (t->type) {
     case DEVICE_KEYBOARD:
-      Serial.println("keyboard");
       Keyboard.write(t->code);
       break;
     case DEVICE_MOUSE:
@@ -48,8 +48,9 @@ void execute_target(target* t) {
       Consumer.press(t->code);
       break;
   }
-}
 
+  return true;
+}
 // ---
 
 #define ESCAPE 0x1B
@@ -59,39 +60,65 @@ void setup() {
   Serial.println("Initializing keyboard serial at 9600 baud");
   Serial1.begin(9600, SERIAL_8N1);
 
-  init_keys();
-
   Serial.println("Initializing keyboard library");
   Keyboard.begin();
-  //Consumer.begin();
-  //Mouse.begin();
+  Consumer.begin();
+  Mouse.begin();
   Serial.println("Ready");
 }
 
 void loop() {
   if (Serial1.available() > 0) {
-    byte first = Serial1.read();
+    // Read first byte
+    int first = Serial1.read();
 
     if (first == ESCAPE) {
-      return doubl();
+      // More bytes follow
+      doubl();
     } else {
-      return single(first);
+      single(first);
+    }
+
+    Serial.print('\n');
+  }
+}
+
+void single(int key) {
+  byte size = sizeof(r[key]) / sizeof(target);
+
+  Serial.print("Single 0x");
+  Serial.print(key, HEX);
+  Serial.print(", size ");
+  Serial.print(size);
+  Serial.print("\n");
+
+  for (int i = 0; i < sizeof(r[key]) / sizeof(target); i++) {
+    // Copy the current target to RAM
+    target current;
+    memcpy_P(&current, &r[key][i], sizeof(target));
+
+    bool executed = execute_target(&current);
+
+    // Simple write the key if there is no definition
+    if (!executed && i == 0) {
+      Keyboard.write(key);
+      return;
     }
   }
 }
 
+byte execute_targets(const target *t, byte size) {
+  byte executed = 0;
 
+  for (byte i = 0; i < size; i++) {
+    target current;
+    memcpy_P(&current, &t[i], sizeof(target));
 
-void single(byte key) {
-  for (byte i = 0; i < sizeof(r[key]) / 2; i++) {
-    Serial.print("Single ");
-    Serial.print(key, HEX);
-    Serial.print("\n");
-    print_target(&r[key][i]);
-    execute_target(&r[key][i]);
+    bool current_executed = execute_target(&current);
+    if (current_executed) executed++;
+    else return executed;
   }
 }
-
 
 void doubl() {
   // Wait for two more bytes
@@ -101,17 +128,32 @@ void doubl() {
   byte second = Serial1.read();
   byte third = Serial1.read();
 
-  target* t;
+  Serial.print("Double: ");
+  Serial.print(second, HEX);
+  Serial.print(", ");
+  Serial.print(third, HEX);
+  Serial.print('\n');
+
+  target *t;
+  byte length = 0;
+
   switch (second) {
     case 0x2A:
       t = a[third];
+      length = sizeof(a[third]) / sizeof(target);
     case 0x2B:
       t = b[third];
+      length = sizeof(b[third]) / sizeof(target);
     case 0x2C:
       t = c[third];
+      length = sizeof(c[third]) / sizeof(target);
   }
 
-  for (byte i = 0; i < sizeof(*t) * 2; i++) {
-    Serial.print(sizeof(*t));
+  for (byte i = 0; i < length; i++) {
+    // Copy the current target to RAM
+    target current;
+    memcpy_P(&current, t[i], sizeof(target));
+    
+    execute_target(&current);
   }
 }
