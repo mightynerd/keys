@@ -3,7 +3,7 @@ token Hex       (["0123456789abcdefABCDEF"] +);
 SSource.  Source ::= "single" Hex;
 DSource.  Source ::= "double" Hex Hex;
 
-KeyCode.      Key ::= Ident;
+KeyCode.      Key ::= String;
 
 Mouse.    Device ::= "mouse";
 Keyboard. Device ::= "keyboard";

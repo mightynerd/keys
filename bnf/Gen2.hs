@@ -83,13 +83,13 @@ generateArray name size sts =
 genTargets :: Int -> SourceTargets -> String
 genTargets i sts = case current of
   Just (_, targs) -> "{" ++ joins (map genTarget targs) "," ++ "}"
-  Nothing -> ","
+  Nothing -> "{}"
   where
     current = find sts (\(Hex source, _) -> i == parseHex source)
 
 -- Generate a single target {a, b}
 genTarget :: Targ -> String
-genTarget ((Target device (KeyCode (Ident key)))) = "{" ++ dev device ++ ", " ++ key ++ "}"
+genTarget ((Target device (KeyCode key))) = "{" ++ dev device ++ ", " ++ key ++ "}"
   where
     dev :: Device -> String
     dev device = case device of
@@ -103,7 +103,7 @@ generate env = prefix ++ generateArrays env
     prefix :: Output
     prefix =
       lines
-        "#define DEVICE_KEYBOARDD 0x01\n\
+        "#define DEVICE_KEYBOARD 0x01\n\
         \#define DEVICE_MOUSE 0x02\n\
         \#define DEVICE_CONSUMER 0x03\n\n\
         \struct target {\n\
