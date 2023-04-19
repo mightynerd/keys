@@ -60,18 +60,19 @@ type Output = [String]
 type Generate = Writer Output
 
 -- Generate array definitions
+-- `size` is greater by one because of the null target
 generateArrays :: Env -> Output
 generateArrays (St {aMax, a, bMax, b, cMax, c, rMax, r}) =
-  [ generateArray "a" aMax a,
-    generateArray "b" bMax b,
-    generateArray "c" cMax c,
-    generateArray "r" rMax r
+  [ generateArray "a" (aMax + 1) a,
+    generateArray "b" (bMax + 1) b,
+    generateArray "c" (cMax + 1) c,
+    generateArray "r" (rMax + 1) r
   ]
 
 -- Generate a single array definition
 generateArray :: String -> Int -> SourceTargets -> String
 generateArray name size sts =
-  "struct target "
+  "const PROGMEM struct target "
     ++ name
     ++ "[256]["
     ++ show size
@@ -82,8 +83,8 @@ generateArray name size sts =
 -- Generate targets "{{a, b}, {c, d}}"
 genTargets :: Int -> SourceTargets -> String
 genTargets i sts = case current of
-  Just (_, targs) -> "{" ++ joins (map genTarget targs) "," ++ "}"
-  Nothing -> "{}"
+  Just (_, targs) -> "{" ++ joins (map genTarget targs) "," ++ ",{0,0}}"
+  Nothing -> "{{0,0},{0,0}}"
   where
     current = find sts (\(Hex source, _) -> i == parseHex source)
 
