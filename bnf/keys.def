@@ -1,8 +1,76 @@
-double 2A 24 
-  =>  keyboard "A1",
-      consumer "A2" ;
-single 2A 
-  => keyboard "A3",
-     consumer "A4" ;
-# little comment
-single 2B => mouse "A5" ;
+# https://github.com/NicoHood/HID/blob/master/src/KeyboardLayouts/ImprovedKeylayouts.h
+# https://github.com/NicoHood/HID/blob/master/src/KeyboardLayouts/ImprovedKeylayoutsSE.h
+
+# ------ QWERTY-part
+
+# Escape
+double 2C 68
+  =>  keyboard "KEY_ESC" ;
+
+# Backspace
+single 7F
+  =>  keyboard "KEY_BACKSPACE" ;
+
+# Å
+single 7D
+  =>  keyboard "KEY_SE_ACIRCLE" ;
+
+# Å
+single 7C
+  =>  keyboard "KEY_SE_OUMLAUT" ;
+
+# Ä
+single 7B
+  =>  keyboard "KEY_SE_AUMLAUT" ;
+
+# ------ F-keys
+double 2A 73 
+  =>  keyboard "KEY_F1" ;
+double 2A 74 
+  =>  keyboard "KEY_F2" ;
+double 2A 75 
+  =>  keyboard "KEY_F3" ;
+double 2A 76 
+  =>  keyboard "KEY_F4" ;
+double 2A 77 
+  =>  keyboard "KEY_F5" ;
+double 2A 78 
+  =>  keyboard "KEY_F6" ;
+double 2A 79 
+  =>  keyboard "KEY_F7" ;
+double 2A 7A 
+  =>  keyboard "KEY_F8" ;
+double 2A 7B 
+  =>  keyboard "KEY_F9" ;
+double 2A 7C 
+  =>  keyboard "KEY_F10" ;
+double 2A 7D 
+  =>  keyboard "KEY_F11" ;
+double 2A 7E 
+  =>  keyboard "KEY_F12" ;
+
+# ------ P-keys
+double 2A 53 
+  =>  keyboard "KEY_F13" ;
+double 2A 54 
+  =>  keyboard "KEY_F14" ;
+double 2A 55 
+  =>  keyboard "KEY_F15" ;
+double 2A 56 
+  =>  keyboard "KEY_F16" ;
+double 2A 57 
+  =>  keyboard "KEY_F17" ;
+double 2A 58 
+  =>  keyboard "KEY_F18" ;
+double 2A 59 
+  =>  keyboard "KEY_F19" ;
+double 2A 5A 
+  =>  keyboard "KEY_F20" ;
+double 2A 5B 
+  =>  keyboard "KEY_F21" ;
+double 2A 5C 
+  =>  keyboard "KEY_F22" ;
+double 2A 5D 
+  =>  keyboard "KEY_F23" ;
+double 2A 5E 
+  =>  keyboard "KEY_F24" ;
