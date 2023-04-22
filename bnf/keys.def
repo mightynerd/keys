@@ -1,6 +1,14 @@
 # https://github.com/NicoHood/HID/blob/master/src/KeyboardLayouts/ImprovedKeylayouts.h
 # https://github.com/NicoHood/HID/blob/master/src/KeyboardLayouts/ImprovedKeylayoutsSE.h
 
+# Demo
+double 2A 30 => 
+  keyboard down "KEY_LEFT_SHIFT" ,
+  keyboard "KEY_A" ,
+  keyboard "KEY_B" ,
+  keyboard up "KEY_LEFT_SHIFT" ,
+  keyboard "KEY_C" ;
+
 # ------ QWERTY-part
 
 # Escape

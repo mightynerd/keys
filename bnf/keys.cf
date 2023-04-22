@@ -9,7 +9,11 @@ Mouse.    Device ::= "mouse";
 Keyboard. Device ::= "keyboard";
 Consumer. Device ::= "consumer";
 
-Target.   Targ ::= Device Key;
+Down.     Action ::= "down";
+Up.       Action ::= "up";
+Click.    Action ::= "";
+
+Target.   Targ ::= Device Action Key;
 separator Targ ",";
 
 Definition.   Def ::= Source "=>" [Targ] ";";

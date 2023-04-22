@@ -9,6 +9,10 @@ KeyboardKeycode modifiers[3] = {KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT};
 #define MODIFIER_PRESSED 0x2C
 #define MODIFIER_RELEASED 0x21
 
+#define ACTION_CLICK 0x01
+#define ACTION_UP 0x02
+#define ACTION_DOWN 0x03
+
 #define DEVICE_KEYBOARD 0x01
 #define DEVICE_MOUSE 0x02
 #define DEVICE_CONSUMER 0x03
@@ -18,28 +22,60 @@ struct target {
   KeyboardKeycode code;
 };
 
-const PROGMEM struct target a[256][2] = {};
-const PROGMEM struct target b[256][2] = {};
-const PROGMEM struct target c[256][2] = {};
-const PROGMEM struct target r[256][2] = {};
+const PROGMEM struct target a[256][6] = {}
+const PROGMEM struct target b[256][2] = {}
+const PROGMEM struct target c[256][2] = {}
+const PROGMEM struct target r[256][2] = {}
 
 // Executes a single target assuming it's defined
 void execute_target(const target* t) {
-  Serial.print(" -> Type: ");
-  Serial.print(t->type, HEX);
+  byte device = t->type & 0x0F;
+  byte action = t->type >> 4;
+
+  Serial.print(" -> Dev: ");
+  Serial.print(device, HEX);
+  Serial.print(", act: ");
+  Serial.print(action, HEX);
   Serial.print(", code: ");
   Serial.print(t->code, HEX);
   Serial.print("\n");
 
-  switch (t->type) {
+  switch (device) {
     case DEVICE_KEYBOARD:
-      Keyboard.write(t->code);
+      switch (action) {
+        case ACTION_DOWN:
+          Keyboard.press(t->code);
+          break;
+        case ACTION_UP:
+          Keyboard.release(t->code);
+          break;
+        default:
+          Keyboard.write(t->code);
+      }
       break;
     case DEVICE_MOUSE:
-      Mouse.click(t->code);
+      switch (action) {
+        case ACTION_DOWN:
+          Mouse.press(t->code);
+          break;
+        case ACTION_UP:
+          Mouse.release(t->code);
+          break;
+        default:
+          Mouse.click(t->code);
+      }
       break;
     case DEVICE_CONSUMER:
-      Consumer.press(t->code);
+      switch (action) {
+        case ACTION_DOWN:
+          Consumer.press((ConsumerKeycode)t->code);
+          break;
+        case ACTION_UP:
+          Consumer.release((ConsumerKeycode)t->code);
+          break;
+        default:
+          Consumer.write((ConsumerKeycode)t->code);
+      }
       break;
   }
 }
@@ -106,6 +142,14 @@ void doubl() {
   Serial.print(", ");
   Serial.print(third, HEX);
   Serial.print('\n');
+
+  // Reset
+  if (second == 0x2A && third == 0x3F) {
+    Serial.println(F("Reset"));
+    Keyboard.releaseAll();
+    Mouse.releaseAll();
+    Consumer.releaseAll();
+  }
 
   // Handle modifiers
   if (modifier(second, third)) return;

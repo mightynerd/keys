@@ -1,19 +1,23 @@
 import Control.Monad.State
-import Control.Monad.Writer
+import Control.Monad.Writer (Writer)
+import Data.Bits
 import Keys.Abs
 import Keys.Par
+import Lib
 import System.Exit (exitFailure)
 
-type SourceTarget = [(Hex, [Targ])]
+type SourceTarget = (Hex, [Targ])
+
+type SourceTargets = [SourceTarget]
 
 data St = St
-  { a :: SourceTarget,
+  { a :: SourceTargets,
     aMax :: Int,
-    b :: SourceTarget,
+    b :: SourceTargets,
     bMax :: Int,
-    c :: SourceTarget,
+    c :: SourceTargets,
     cMax :: Int,
-    r :: SourceTarget,
+    r :: SourceTargets,
     rMax :: Int
   }
   deriving (Show)
@@ -57,95 +61,68 @@ type Output = [String]
 type Generate = Writer Output
 
 -- Generate array definitions
+-- `size` is greater by one because of the null target
 generateArrays :: Env -> Output
-generateArrays (St {aMax = a, bMax = b, cMax = c, rMax = r}) =
-  generateArray "a" a
-    ++ generateArray "b" b
-    ++ generateArray "c" c
-    ++ generateArray "r" r
-    ++ [""]
+generateArrays (St {aMax, a, bMax, b, cMax, c, rMax, r}) =
+  [ generateArray "a" (aMax + 1) a,
+    generateArray "b" (bMax + 1) b,
+    generateArray "c" (cMax + 1) c,
+    generateArray "r" (rMax + 1) r
+  ]
 
 -- Generate a single array definition
-generateArray :: String -> Int -> Output
-generateArray name max = case max of
-  0 -> [""]
-  _ -> ["struct target " ++ name ++ "[256][" ++ show max ++ "];"]
+generateArray :: String -> Int -> SourceTargets -> String
+generateArray name size sts =
+  "const PROGMEM struct target "
+    ++ name
+    ++ "[256]["
+    ++ show size
+    ++ "] = {"
+    ++ joins (map (`genTargets` sts) (take 256 [0 ..])) ","
+    ++ "};"
+
+-- Generate targets "{{a, b}, {c, d}}"
+genTargets :: Int -> SourceTargets -> String
+genTargets i sts = case current of
+  Just (_, targs) -> "{" ++ joins (map genTarget targs) "," ++ ",{0,0}}"
+  Nothing -> "{{0,0},{0,0}}"
+  where
+    current = find sts (\(Hex source, _) -> i == parseHex source)
+
+-- Generate a single target {a, b}
+genTarget :: Targ -> String
+genTarget ((Target device action (KeyCode key))) = "{" ++ devact device action ++ ", " ++ key ++ "}"
+  where
+    -- The `type` byte consists of 4 action bits (most significant) and 4 device bits (least significant)
+    devact :: Device -> Action -> String
+    devact device action = show $ act action `shift` 4 .|. dev device
+    dev :: Device -> Int
+    dev Keyboard = 1
+    dev Mouse = 2
+    dev Consumer = 3
+    act :: Action -> Int
+    act Click = 1
+    act Up = 2
+    act Down = 3
 
 generate :: Env -> Output
-generate env =
-  prefix
-    ++ generateArrays env
-    ++ initFPrefix
-    ++ tab (snd (runWriter $ generateOutput env))
-    ++ initFSuffix
+generate env = prefix ++ generateArrays env
   where
     prefix :: Output
     prefix =
       lines
-        "#define DEVICE_KEYBOARDD 0x01\n\
+        "#define DEVICE_KEYBOARD 0x01\n\
         \#define DEVICE_MOUSE 0x02\n\
         \#define DEVICE_CONSUMER 0x03\n\n\
+        \#define ACTION_CLICK 0x01\n\
+        \#define ACTION_UP 0x02\n\
+        \#define ACTION_DOWN 0x03\n\n\
         \struct target {\n\
         \  byte type;\n\
         \  byte code;\n\
         \};\n\n"
-    initFPrefix :: Output
-    initFPrefix = lines "void init_keys() {\n"
-    initFSuffix :: Output
-    initFSuffix = lines "}"
     tab :: Output -> Output
     tab = map ("  " ++)
-
-generateOutput :: Env -> Generate ()
-generateOutput (St {a, b, c, r}) = do
-  generateSourceTarget "a" a
-  generateSourceTarget "b" b
-  generateSourceTarget "c" c
-  generateSourceTarget "r" r
-
-generateSourceTarget :: String -> SourceTarget -> Generate ()
-generateSourceTarget name ((Hex s, targs) : rest) = do
-  generateAssignments name s targs
-  generateSourceTarget name rest
-generateSourceTarget name [] = pure ()
-
-generateAssignments :: String -> String -> [Targ] -> Generate ()
-generateAssignments name source targets = generateAssignments' name source targets 0
-  where
-    generateAssignments' :: String -> String -> [Targ] -> Integer -> Generate ()
-    generateAssignments' name source (target : targets) i = do
-      tell [generateDeviceAssignment name source target i]
-      tell [generateCodeAssigment name source target i]
-      generateAssignments' name source targets $ i + 1
-    generateAssignments' _ _ [] _ = pure ()
-
-generateDeviceAssignment :: String -> String -> Targ -> Integer -> String
-generateDeviceAssignment name source (Target device _) i =
-  name
-    ++ "[0x"
-    ++ source
-    ++ "]["
-    ++ show i
-    ++ "].type = "
-    ++ dev device
-    ++ ";"
-  where
-    dev :: Device -> String
-    dev device = case device of
-      Keyboard -> "DEVICE_KEYBOARD"
-      Mouse -> "DEVICE_MOUSE"
-      Consumer -> "DEVICE_CONSUMER"
-
-generateCodeAssigment :: String -> String -> Targ -> Integer -> String
-generateCodeAssigment name source (Target _ (KeyCode (Ident code))) i =
-  name
-    ++ "[0x"
-    ++ source
-    ++ "]["
-    ++ show i
-    ++ "].code = "
-    ++ code
-    ++ ";"
 
 parse :: String -> IO Defs
 parse s =
@@ -154,8 +131,7 @@ parse s =
       putStrLn "Error"
       putStrLn err
       exitFailure
-    Right prog -> do
-      return prog
+    Right prog -> return prog
 
 main :: IO ()
 main = do
