@@ -23,6 +23,10 @@ single 7C
 single 7B
   =>  keyboard "KEY_SE_AUMLAUT" ;
 
+# Enter
+single D
+  =>  keyboard "KEY_ENTER" ;
+
 # ------ F-keys
 double 2A 73 
   =>  keyboard "KEY_F1" ;
@@ -74,3 +78,22 @@ double 2A 5D
   =>  keyboard "KEY_F23" ;
 double 2A 5E 
   =>  keyboard "KEY_F24" ;
+
+# ------ Bottom left
+double 2B 63
+  =>  mouse "MOUSE_PREV" ;
+
+double 2B 64
+  =>  mouse "MOUSE_NEXT" ;
+
+double 2B 74
+  =>  keyboard "KEY_HOME" ;
+
+double 2B 75
+  =>  keyboard "KEY_END" ;
+
+double 2B 76
+  =>  keyboard "KEY_PAGE_UP" ;
+
+double 2C 38
+  =>  keyboard "KEY_PAGE_DOWN" ;
