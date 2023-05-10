@@ -18,20 +18,19 @@ KeyboardKeycode modifiers[3] = {KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT};
 #define DEVICE_CONSUMER 0x03
 
 struct target {
-  KeyboardKeycode type;
-  KeyboardKeycode code;
+  byte type;
+  byte code;
 };
 
-const PROGMEM struct target a[256][6] = {}
-const PROGMEM struct target b[256][2] = {}
-const PROGMEM struct target c[256][2] = {}
-const PROGMEM struct target r[256][2] = {}
+const PROGMEM struct target a[256][7] = {};
+const PROGMEM struct target b[256][5] = {};
+const PROGMEM struct target c[256][2] = {};
+const PROGMEM struct target r[256][2] = {};
 
 // Executes a single target assuming it's defined
 void execute_target(const target* t) {
   byte device = t->type & 0x0F;
   byte action = t->type >> 4;
-
   Serial.print(" -> Dev: ");
   Serial.print(device, HEX);
   Serial.print(", act: ");
@@ -41,19 +40,21 @@ void execute_target(const target* t) {
   Serial.print("\n");
 
   switch (device) {
-    case DEVICE_KEYBOARD:
+    case DEVICE_KEYBOARD: {
+      KeyboardKeycode code = (KeyboardKeycode)t->code;
       switch (action) {
         case ACTION_DOWN:
-          Keyboard.press(t->code);
+          Keyboard.press(code);
           break;
         case ACTION_UP:
-          Keyboard.release(t->code);
+          Keyboard.release(code);
           break;
         default:
-          Keyboard.write(t->code);
+          Keyboard.write(code);
       }
       break;
-    case DEVICE_MOUSE:
+    }
+    case DEVICE_MOUSE: {
       switch (action) {
         case ACTION_DOWN:
           Mouse.press(t->code);
@@ -65,18 +66,21 @@ void execute_target(const target* t) {
           Mouse.click(t->code);
       }
       break;
-    case DEVICE_CONSUMER:
+    }
+    case DEVICE_CONSUMER: {
+      ConsumerKeycode code = (ConsumerKeycode)t->code;
       switch (action) {
         case ACTION_DOWN:
-          Consumer.press((ConsumerKeycode)t->code);
+          Consumer.press(code);
           break;
         case ACTION_UP:
-          Consumer.release((ConsumerKeycode)t->code);
+          Consumer.release(code);
           break;
         default:
-          Consumer.write((ConsumerKeycode)t->code);
+          Consumer.write(code);
       }
       break;
+    }
   }
 }
 
