@@ -72,3 +72,6 @@ The `type` byte's 4 most significant bits represent the action while the 4 least
   - Consumer: `0x3`
 
 [NicoHood's HID library](https://github.com/NicoHood/HID) is used to make the Arduino act as a USB HID device, or more specifically, a keyboard, mouse and consumer device at the same time.
+
+# Notes
+The keyboard has a built in piezo speaker that makes a beep on every key press by default. I accidentally found out that this behavior can be toggled with CTRL+k. I discovered this by noticing that, when holding CTRL, the CTRL down event is sent over serial but now the "k" key. There is an additional key combination, CTRL+b, that's not sent anything over serial.
