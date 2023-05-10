@@ -9,6 +9,7 @@ double 2A 30 =>
   keyboard up "KEY_LEFT_SHIFT" ,
   keyboard "KEY_C" ;
 
+
 # ------ QWERTY-part
 
 # Escape
@@ -34,6 +35,10 @@ single 7B
 # Enter
 single D
   =>  keyboard "KEY_ENTER" ;
+
+# GUI (under enter)
+double 2C 67
+  =>  keyboard "KEY_LEFT_GUI" ;
 
 # ------ F-keys
 double 2A 73 
@@ -87,6 +92,12 @@ double 2A 5D
 double 2A 5E 
   =>  keyboard "KEY_F24" ;
 
+# ------ Above P-keys
+#double 2A 33
+#  =>  keyboard down "KEY_KEY_RIGHT_CTRL" ,
+#      keyboard "KEY_F1" ,
+#      keyboard up "KEY_KEY_RIGHT_CTRL" ;
+
 # ------ Bottom left
 double 2B 63
   =>  mouse "MOUSE_PREV" ;
@@ -105,3 +116,186 @@ double 2B 76
 
 double 2C 38
   =>  keyboard "KEY_PAGE_DOWN" ;
+
+# ------ Bottom right
+# Keypad numbers
+double 2B 4F
+  =>  keyboard "KEYPAD_7" ;
+double 2B 50
+  =>  keyboard "KEYPAD_8" ;
+double 2B 51
+  =>  keyboard "KEYPAD_9" ;
+double 2B 60
+  =>  keyboard "KEYPAD_4" ;
+double 2B 61
+  =>  keyboard "KEYPAD_5" ;
+double 2B 62
+  =>  keyboard "KEYPAD_6" ;
+double 2B 71
+  =>  keyboard "KEYPAD_1" ;
+double 2B 72
+  =>  keyboard "KEYPAD_2" ;
+double 2B 73
+  =>  keyboard "KEYPAD_3" ;
+double 2C 34
+  =>  keyboard "KEYPAD_0" ;
+
+# Keypad signs
+double 2C 33
+  =>  keyboard "KEYPAD_MULTIPLY" ;
+double 2C 35
+  =>  keyboard "KEYPAD_ADD" ;
+double 2C 44
+  =>  keyboard "KEYPAD_SUBTRACT" ;
+double 2C 45
+  =>  keyboard "KEYPAD_DIVIDE" ;
+double 2C 46
+  =>  keyboard "KEYPAD_DOT" ;
+
+# Keypad enter
+double 2C 72
+  =>  keyboard "KEYPAD_ENTER" ;
+
+# Keypad arrows
+double 2B 4E
+  =>  keyboard "KEY_LEFT" ;
+double 2B 5F
+  =>  keyboard "KEY_RIGHT" ;
+double 2B 70
+  =>  keyboard "KEY_UP" ;
+double 2C 32
+  =>  keyboard "KEY_DOWN" ;
+
+# ------ Top right
+# Media
+double 2A 4B
+  =>  consumer "MEDIA_RECORD" ;
+double 2B 3C
+  =>  consumer "MEDIA_STOP" ;
+double 2A 4E
+  =>  consumer "MEDIA_PREVIOUS" ;
+double 2A 4F
+  =>  consumer "MEDIA_PLAY_PAUSE" ;
+double 2C 6B
+  =>  consumer "MEDIA_NEXT" ;
+
+# Volume
+double 2A 4C
+  =>  consumer "MEDIA_VOLUME_UP" ;
+double 2A 6C
+  =>  consumer "MEDIA_VOLUME_DOWN" ;
+double 2B 3D
+  =>  consumer "MEDIA_VOLUME_MUTE" ;
+
+# i3 test
+# Quit
+double 2A 3F
+  =>  keyboard down "KEY_LEFT_ALT",
+      keyboard down "KEY_LEFT_SHIFT",
+      keyboard "'q'",
+      keyboard up "KEY_LEFT_ALT",
+      keyboard up "KEY_LEFT_SHIFT" ;
+# Resize
+double 2A 40
+  =>  keyboard down "KEY_LEFT_ALT",
+      keyboard "'r'",
+      keyboard up "KEY_LEFT_ALT" ;
+# Launcher
+double 2A 41
+  =>  keyboard down "KEY_LEFT_ALT",
+      keyboard "'d'",
+      keyboard up "KEY_LEFT_ALT" ;
+
+# Toggle floating
+double 2A 5F
+  =>  keyboard down "KEY_LEFT_ALT",
+      keyboard down "KEY_LEFT_SHIFT",
+      keyboard "' '",
+      keyboard up "KEY_LEFT_ALT",
+      keyboard up "KEY_LEFT_SHIFT" ;
+# Up
+double 2A 60
+  =>  keyboard down "KEY_LEFT_ALT",
+      keyboard "'l'",
+      keyboard up "KEY_LEFT_ALT" ;
+# Fullscreen
+double 2A 61
+  =>  keyboard down "KEY_LEFT_ALT",
+      keyboard "'f'",
+      keyboard up "KEY_LEFT_ALT" ;
+
+double 2B 30
+  =>  keyboard down "KEY_LEFT_ALT",
+      keyboard "'j'",
+      keyboard up "KEY_LEFT_ALT" ;
+double 2B 31
+  =>  keyboard down "KEY_LEFT_ALT",
+      keyboard "'k'",
+      keyboard up "KEY_LEFT_ALT" ;
+double 2B 32
+  =>  keyboard down "KEY_LEFT_ALT",
+      keyboard "';'",
+      keyboard up "KEY_LEFT_ALT" ;
+
+# ------ Tmux test
+# Pane by number
+double 2A 33
+  =>  keyboard down "KEY_RIGHT_CTRL",
+      keyboard "KEY_B",
+      keyboard up "KEY_RIGHT_CTRL",
+      keyboard "KEY_0" ;
+double 2A 34
+  =>  keyboard down "KEY_RIGHT_CTRL",
+      keyboard "KEY_B",
+      keyboard up "KEY_RIGHT_CTRL",
+      keyboard "KEY_1" ;
+double 2A 35
+  =>  keyboard down "KEY_RIGHT_CTRL",
+      keyboard "KEY_B",
+      keyboard up "KEY_RIGHT_CTRL",
+      keyboard "KEY_2" ;
+# ...
+# Switch pane
+double 2A 63
+  =>  keyboard down "KEY_RIGHT_CTRL",
+      keyboard "KEY_B",
+      keyboard up "KEY_RIGHT_CTRL",
+      keyboard "KEY_UP" ;
+double 2B 34
+  =>  keyboard down "KEY_RIGHT_CTRL",
+      keyboard "KEY_B",
+      keyboard up "KEY_RIGHT_CTRL",
+      keyboard "KEY_DOWN" ;
+double 2B 33
+  =>  keyboard down "KEY_RIGHT_CTRL",
+      keyboard "KEY_B",
+      keyboard up "KEY_RIGHT_CTRL",
+      keyboard "KEY_LEFT" ;
+double 2B 35
+  =>  keyboard down "KEY_RIGHT_CTRL",
+      keyboard "KEY_B",
+      keyboard up "KEY_RIGHT_CTRL",
+      keyboard "KEY_RIGHT" ;
+# Split pane
+double 2A 42
+  =>  keyboard down "KEY_RIGHT_CTRL",
+      keyboard "KEY_B",
+      keyboard up "KEY_RIGHT_CTRL",
+      keyboard down "KEY_RIGHT_SHIFT",
+      keyboard "KEY_5",
+      keyboard up "KEY_RIGHT_SHIFT" ;
+double 2A 62
+  =>  keyboard down "KEY_RIGHT_CTRL",
+      keyboard "KEY_B",
+      keyboard up "KEY_RIGHT_CTRL",
+      keyboard down "KEY_RIGHT_SHIFT",
+      keyboard "KEY_2",
+      keyboard up "KEY_RIGHT_SHIFT" ;
+
+
+  
+
+# quit, resize, dmenu, toggle float, fullscreen
+# focus (4)
+# move (4)
+
